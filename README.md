@@ -34,3 +34,17 @@ SPA HTML5/CSS/JS untuk GitHub Pages, backend Google Apps Script dan Google Sheet
 - `xlsx.full.min.js` dimuat dari CDN, sehingga ekspor membutuhkan akses internet bila pustaka belum tersedia dalam cache.
 - Google Sheets memiliki batas skala/kuota Apps Script. Untuk jumlah pengguna besar, gunakan backend yang dirancang untuk konkurensi.
 - Halaman pengerjaan soal tidak menampilkan ilustrasi perangkat maupun ikon soal. Gambar LKPD hanya menjadi rujukan materi untuk bank soal.
+
+### Efek suara tombol
+Tombol **Simpan dan Lanjut** memutar bunyi konfirmasi singkat dua nada menggunakan Web Audio API, tanpa berkas audio tambahan. Bunyi tidak diputar ketika timer habis dan perpindahan berlangsung otomatis. Perangkat yang disenyapkan atau browser yang membatasi audio mungkin tidak mengeluarkan suara.
+
+
+## Pengaturan efek suara (versi suara kustom)
+Di halaman awal, siswa dapat memilih suara **Lembut**, **Ceria**, **Singkat**, atau **Tanpa suara**, menggeser volume dari 0 sampai 100%, dan menekan **Coba Efek Suara**. Pengaturan disimpan di localStorage browser perangkat tersebut dan diterapkan pada tombol **Simpan dan Lanjut**. Audio dibuat dengan Web Audio API tanpa file audio tambahan. Browser mungkin mensyaratkan interaksi pertama sebelum audio bisa berbunyi.
+
+
+### Perbaikan karakter tampilan
+- Simbol emoji pada label antarmuka diganti teks biasa untuk mencegah kotak/karakter rusak pada perangkat dengan font terbatas.
+- HTML memakai UTF-8 dan aset CSS/JS memakai parameter versi agar browser mengambil pembaruan.
+- Efek suara dan semua fungsi asesmen dipertahankan.
+- Setelah unggah file ke GitHub Pages, lakukan refresh paksa browser jika masih melihat tampilan lama.

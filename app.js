@@ -5,7 +5,7 @@
 */
 
 const CONFIG = {
-  GAS_URL: "https://script.google.com/macros/s/AKfycbylB0wQ_MCpQEeQQIudGYjmqrIjTuR_r5XTu33rouEeCN5GMyeuPPQ39q6-qS4WNqdx/exec",
+  GAS_URL: "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE",
   QUESTION_TIME_SECONDS: 40,
   QUESTIONS_PER_LEVEL: {1:15, 2:10, 3:5},
   TOTAL_QUESTIONS: 30,
@@ -36,16 +36,6 @@ const state = {
   teacherPoll: null,
 };
 
-const ILLUSTRATIONS = {
-  hardware: { icon: "ðŸ–¥ï¸", text: "Perangkat keras adalah bagian komputer yang dapat dilihat atau disentuh." },
-  cpu: { icon: "ðŸ§ ", text: "CPU memproses instruksi dan mengatur berbagai kegiatan utama komputer." },
-  memory: { icon: "ðŸ§©", text: "Memori menyimpan data sementara atau permanen sesuai jenisnya." },
-  storage: { icon: "ðŸ’¾", text: "Media penyimpanan menyimpan data agar dapat digunakan kembali." },
-  io: { icon: "âŒ¨ï¸", text: "Perangkat input dan output membantu manusia berinteraksi dengan komputer." },
-  os: { icon: "âš™ï¸", text: "Sistem operasi mengelola perangkat keras dan menjadi penghubung dengan aplikasi." },
-  binary: { icon: "0ï¸âƒ£1ï¸âƒ£", text: "Komputer merepresentasikan data menggunakan keadaan digital, misalnya 0 dan 1." },
-  network: { icon: "ðŸŒ", text: "Perangkat jaringan membantu komputer bertukar data dengan perangkat lain." },
-};
 
 // difficulty b roughly follows Rasch 1PL scale. Higher = harder.
 // Each level contains 15 bank questions. 45 total.
@@ -74,7 +64,7 @@ const QUESTION_BANK = {
     mcq("L1-15", -0.2, "memory", "Ketika siswa menyimpan tugas ke dalam flashdisk, flashdisk berfungsi sebagai ...", ["Penyimpanan", "Perangkat proses", "Perangkat output", "Brainware"], 0),
   ],
   2: [
-    mcq("L2-01", -0.4, "cpu", "Urutan sederhana proses komputer yang paling tepat adalah ...", ["Input â†’ Proses â†’ Output", "Output â†’ Input â†’ Proses", "Proses â†’ Output â†’ Input", "Input â†’ Output â†’ Proses"], 0),
+    mcq("L2-01", -0.4, "cpu", "Urutan sederhana proses komputer yang paling tepat adalah ...", ["Input  ->  Proses  ->  Output", "Output  ->  Input  ->  Proses", "Proses  ->  Output  ->  Input", "Input  ->  Output  ->  Proses"], 0),
     tf("L2-02", -0.3, "memory", "Guru yang menjalankan aplikasi presentasi termasuk brainware.", true),
     mcq("L2-03", -0.2, "storage", "Perbedaan yang tepat antara monitor dan SSD adalah ...", ["Monitor menampilkan hasil, SSD menyimpan data", "Monitor adalah perangkat input, SSD output", "Monitor dan SSD hanya menerima suara", "Monitor dan SSD adalah aplikasi"], 0),
     match("L2-04", 0.0, "io", "Pasangkan kegiatan dengan perangkat yang paling sesuai.", [
@@ -115,14 +105,14 @@ const QUESTION_BANK = {
     match("L3-12", 1.7, "binary", "Pasangkan unsur sistem komputer dengan contoh yang tepat.", [
       ["Hardware", "Printer"], ["Software", "Aplikasi pengolah kata"], ["Brainware", "Siswa pengguna komputer"]
     ]),
-    mcq("L3-13", 1.8, "storage", "Urutan yang benar dari menulis dokumen hingga menyimpannya adalah ...", ["Input lewat keyboard â†’ proses CPU â†’ tampil di monitor â†’ simpan ke SSD", "Monitor â†’ printer â†’ input keyboard â†’ hapus", "Speaker â†’ CPU â†’ keyboard â†’ monitor", "SSD â†’ speaker â†’ mouse â†’ printer"], 0),
+    mcq("L3-13", 1.8, "storage", "Urutan yang benar dari menulis dokumen hingga menyimpannya adalah ...", ["Input lewat keyboard  ->  proses CPU  ->  tampil di monitor  ->  simpan ke SSD", "Monitor  ->  printer  ->  input keyboard  ->  hapus", "Speaker  ->  CPU  ->  keyboard  ->  monitor", "SSD  ->  speaker  ->  mouse  ->  printer"], 0),
     tf("L3-14", 1.9, "io", "Layar sentuh dapat berperan sebagai output sekaligus input karena menampilkan informasi dan menerima sentuhan.", true),
     mcq("L3-15", 2.0, "hardware", "Komputer tidak dapat menyimpan tugas baru karena penyimpanannya penuh. Apa tindakan paling tepat?", ["Mengosongkan ruang penyimpanan atau memakai media simpan lain", "Mengganti speaker", "Melepas monitor", "Menekan keyboard berulang kali"], 0),
   ],
 };
 
 
-// Tambahan bank soal dari LKPD Pertemuan 1â€“3.
+// Tambahan bank soal dari LKPD Pertemuan 1-3.
 QUESTION_BANK[1].push(mcq("L1-16", -1.7, "io", "Hardware adalah sebutan untuk ...", ["Bagian komputer yang dapat disentuh", "Program komputer", "Pengguna komputer", "Hasil cetakan"], 0));
 QUESTION_BANK[1].push(mcq("L1-17", -1.655, "storage", "Manakah contoh software?", ["Mouse", "Keyboard", "Aplikasi menggambar", "Printer"], 2));
 QUESTION_BANK[1].push(mcq("L1-18", -1.61, "cpu", "Siapa yang disebut brainware?", ["Siswa yang menggunakan komputer", "Monitor", "Aplikasi pengetikan", "Flashdisk"], 0));
@@ -159,7 +149,7 @@ QUESTION_BANK[2].push(mcq("L2-18", -0.18, "cpu", "Saat guru mencetak bahan ajar,
 QUESTION_BANK[2].push(mcq("L2-19", -0.095, "os", "Foto dipindai lalu tampil di layar. Alat yang pertama memasukkan data ialah ...", ["Scanner", "Monitor", "Speaker", "Printer"], 0));
 QUESTION_BANK[2].push(mcq("L2-20", -0.01, "hardware", "Ketika operator memperbaiki keyboard rusak, operator adalah ...", ["Brainware", "Software", "Output", "Storage"], 0));
 QUESTION_BANK[2].push(mcq("L2-21", 0.075, "io", "Penyimpanan diperlukan setelah pekerjaan selesai supaya ...", ["File dapat digunakan kembali", "CPU berhenti selamanya", "Monitor berubah menjadi input", "Mouse mencetak dokumen"], 0));
-QUESTION_BANK[2].push(mcq("L2-22", 0.16, "storage", "Susunan mana yang paling tepat untuk membuat dan menyimpan tugas?", ["Ketik â†’ diproses â†’ tampil â†’ simpan", "Simpan â†’ tampil â†’ ketik â†’ proses", "Cetak â†’ simpan â†’ proses â†’ ketik", "Tampil â†’ proses â†’ simpan â†’ ketik"], 0));
+QUESTION_BANK[2].push(mcq("L2-22", 0.16, "storage", "Susunan mana yang paling tepat untuk membuat dan menyimpan tugas?", ["Ketik  ->  diproses  ->  tampil  ->  simpan", "Simpan  ->  tampil  ->  ketik  ->  proses", "Cetak  ->  simpan  ->  proses  ->  ketik", "Tampil  ->  proses  ->  simpan  ->  ketik"], 0));
 QUESTION_BANK[2].push(mcq("L2-23", 0.245, "cpu", "Keyboard dan mikrofon sama-sama termasuk ...", ["Input", "Output", "Storage", "Brainware"], 0));
 QUESTION_BANK[2].push(mcq("L2-24", 0.33, "os", "Printer dan speaker memiliki kesamaan sebagai ...", ["Perangkat output", "Perangkat input", "Perangkat penyimpanan", "Program aplikasi"], 0));
 QUESTION_BANK[2].push(mcq("L2-25", 0.415, "hardware", "Agar komputer dapat menjalankan aplikasi, sistem operasi membantu ...", ["Mengelola komputer dan aplikasi", "Mencetak tanpa perangkat", "Menghapus kebutuhan pengguna", "Menggantikan CPU"], 0));
@@ -270,14 +260,14 @@ function renderHome() {
   app.innerHTML = `
     <section class="hero">
       <div class="card hero-copy">
-        <span class="badge">âœ¨ 3 level â€¢ 30 soal per sesi</span>
+        <span class="badge">3 level | 30 soal per sesi</span>
         <h1>Asesmen Sistem Komputer</h1>
         <p class="lead">Uji pemahaman tentang perangkat keras, perangkat lunak, input-output, CPU, memori, penyimpanan, dan cara kerja komputer melalui soal interaktif.</p>
         <div class="feature-pills">
-          <span>â±ï¸ 40 detik/soal</span>
-          <span>ðŸŽ¯ Soal adaptif</span>
-          <span>ðŸ”€ Bank soal acak</span>
-          <span>ðŸ§© Matching interaktif</span>
+          <span> 40 detik/soal</span>
+          <span> Soal adaptif</span>
+          <span> Bank soal acak</span>
+          <span> Matching interaktif</span>
         </div>
         <form id="startForm">
           <div class="form-grid">
@@ -293,7 +283,16 @@ function renderHome() {
               </select>
             </div>
           </div>
-          <button class="btn btn-primary btn-wide" style="margin-top:16px" type="submit">Mulai Asesmen ðŸš€</button>
+          <div class="sound-panel" aria-label="Pengaturan efek suara">
+            <div class="sound-panel-head"><strong> Suara tombol Simpan dan Lanjut</strong><span>Atur dan coba sebelum mulai</span></div>
+            <div class="sound-controls">
+              <div class="field"><label for="soundStyle">Karakter suara</label><select id="soundStyle" class="select"><option value="soft">Lembut (dua nada)</option><option value="cheerful">Ceria (tiga nada)</option><option value="click">Singkat (klik)</option><option value="off">Tanpa suara</option></select></div>
+              <div class="field"><label for="soundVolume">Volume: <output id="soundVolumeText">45%</output></label><input id="soundVolume" type="range" min="0" max="100" step="5" value="45" aria-label="Volume efek suara" /></div>
+            </div>
+            <button id="previewSound" type="button" class="btn btn-secondary btn-wide"> Coba Efek Suara</button>
+            <p class="sound-help">Pilihan suara disimpan pada perangkat ini. Suara hanya diputar saat jawaban disimpan, bukan saat waktu habis.</p>
+          </div>
+          <button class="btn btn-primary btn-wide" style="margin-top:16px" type="submit">Mulai Asesmen </button>
         </form>
       </div>
       <div class="card hero-visual" aria-hidden="true">
@@ -315,6 +314,15 @@ function renderHome() {
       </div>
     </section>`;
   document.getElementById("startForm").addEventListener("submit", startAssessment);
+  const soundStyle = document.getElementById('soundStyle');
+  const soundVolume = document.getElementById('soundVolume');
+  const volumeText = document.getElementById('soundVolumeText');
+  soundStyle.value = soundPreferences.style;
+  soundVolume.value = String(soundPreferences.volume);
+  volumeText.textContent = soundPreferences.volume + '%';
+  soundStyle.addEventListener('change', () => { soundPreferences.style = soundStyle.value; persistSoundPreferences(); });
+  soundVolume.addEventListener('input', () => { soundPreferences.volume = Number(soundVolume.value); volumeText.textContent = soundPreferences.volume + '%'; persistSoundPreferences(); });
+  document.getElementById('previewSound').addEventListener('click', () => { playSaveSound(); if (soundPreferences.style === 'off' || !soundPreferences.volume) showToast('Suara sedang dinonaktifkan'); });
 }
 
 async function startAssessment(e) {
@@ -347,12 +355,12 @@ function renderAssessment() {
   state.matchState=q.type==='match'?prepareMatchState(q):null;
   const count=CONFIG.QUESTIONS_PER_LEVEL[state.level];
   app.innerHTML=`<section class="card focused-question">
-    <div class="focus-meta"><span class="meta-pill">ðŸŒŸ Level ${state.level}</span><span class="meta-pill">Soal ${state.questionIndex+1} dari ${count}</span><span class="meta-pill">${escapeHtml(state.student.name)} Â· ${escapeHtml(state.student.className)}</span></div>
+    <div class="focus-meta"><span class="meta-pill"> Level ${state.level}</span><span class="meta-pill">Soal ${state.questionIndex+1} dari ${count}</span><span class="meta-pill">${escapeHtml(state.student.name)}  -  ${escapeHtml(state.student.className)}</span></div>
     <div class="progress-dots" aria-label="Navigasi soal pada level ini">${Array.from({length:count},(_,i)=>`<span title="Soal ${i+1}" class="progress-dot ${i<state.questionIndex?'done':i===state.questionIndex?'active':''}">${i+1}</span>`).join('')}</div>
     <h1 class="focus-title">${escapeHtml(q.text)}</h1>
     ${questionInteractionHtml(q)}
-    <div class="timer-wrap focused-timer"><div class="timer-row"><span>â±ï¸ Waktu menjawab</span><strong id="timerText">00:40</strong></div><div class="timer-track"><div id="timerBar" class="timer-bar" style="width:100%"></div></div></div>
-    <button id="saveNext" type="button" class="btn btn-primary btn-wide save-btn" disabled>Simpan dan Lanjut â†’</button>
+    <div class="timer-wrap focused-timer"><div class="timer-row"><span> Waktu menjawab</span><strong id="timerText">00:40</strong></div><div class="timer-track"><div id="timerBar" class="timer-bar" style="width:100%"></div></div></div>
+    <button id="saveNext" type="button" class="btn btn-primary btn-wide save-btn" disabled>Simpan dan Lanjut  -> </button>
   </section>`;
   bindQuestionEvents(q);
   document.getElementById('saveNext').addEventListener('click',()=>submitAnswer(q.type==='match'?[...state.matchState.links]:state.selectedAnswer,q));
@@ -454,34 +462,49 @@ function clearTimer() {
   state.timerId = null;
 }
 
-// Efek suara konfirmasi lembut, dibuat langsung melalui Web Audio API.
-// Tidak memerlukan file MP3 atau koneksi internet.
+// Pengaturan suara berada di browser siswa, bukan disimpan dalam hasil asesmen.
+const SOUND_STORAGE_KEY = 'sistem-komputer-save-sound-v1';
+const soundPreferences = (() => {
+  try {
+    const stored = JSON.parse(localStorage.getItem(SOUND_STORAGE_KEY) || '{}');
+    return {style: ['soft','cheerful','click','off'].includes(stored.style) ? stored.style : 'soft',
+      volume: Number.isFinite(stored.volume) ? Math.max(0,Math.min(100,stored.volume)) : 45};
+  } catch (_) { return {style:'soft', volume:45}; }
+})();
+function persistSoundPreferences(){
+  try { localStorage.setItem(SOUND_STORAGE_KEY, JSON.stringify(soundPreferences)); } catch (_) {}
+}
 let saveSoundContext = null;
 function playSaveSound() {
+  if (soundPreferences.style === 'off' || soundPreferences.volume <= 0) return;
   try {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return;
     if (!saveSoundContext) saveSoundContext = new AudioContextClass();
     const ctx = saveSoundContext;
-    if (ctx.state === "suspended") ctx.resume().catch(() => {});
-    const now = ctx.currentTime;
-    [660, 880].forEach((frequency, index) => {
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    const styles = {
+      soft: {frequencies:[660,880], delay:.09, duration:.17, wave:'sine', gain:.14},
+      cheerful: {frequencies:[523.25,659.25,783.99], delay:.095, duration:.15, wave:'triangle', gain:.12},
+      click: {frequencies:[740], delay:0, duration:.075, wave:'sine', gain:.10}
+    };
+    const profile = styles[soundPreferences.style] || styles.soft;
+    const now = ctx.currentTime + .005;
+    profile.frequencies.forEach((frequency, index) => {
       const oscillator = ctx.createOscillator();
       const gain = ctx.createGain();
-      const start = now + index * 0.085;
-      oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(frequency, start);
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.11, start + 0.018);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.16);
+      const at = now + index * profile.delay;
+      oscillator.type = profile.wave;
+      oscillator.frequency.setValueAtTime(frequency, at);
+      gain.gain.setValueAtTime(.0001, at);
+      gain.gain.exponentialRampToValueAtTime(Math.max(.0002,profile.gain * soundPreferences.volume / 100), at + .012);
+      gain.gain.exponentialRampToValueAtTime(.0001, at + profile.duration);
       oscillator.connect(gain);
       gain.connect(ctx.destination);
-      oscillator.start(start);
-      oscillator.stop(start + 0.17);
+      oscillator.start(at);
+      oscillator.stop(at + profile.duration + .01);
     });
-  } catch (error) {
-    // Audio bersifat tambahan: asesmen tetap berjalan jika audio diblokir.
-  }
+  } catch (_) { /* Efek suara opsional; asesmen tetap berjalan. */ }
 }
 
 async function submitAnswer(answer, q, timedOut = false) {
@@ -517,14 +540,14 @@ async function submitAnswer(answer, q, timedOut = false) {
     correct,
     responseTime: Math.round(responseTime * 10) / 10,
     timedOut,
-    response: q.type === "match" ? (Array.isArray(answer) ? answer.map(l=>`${state.matchState.left[l.left].label} â†’ ${state.matchState.right[l.right].label}`).join("; ") : "") : (answer === null ? "" : q.options[answer]),
+    response: q.type === "match" ? (Array.isArray(answer) ? answer.map(l=>`${state.matchState.left[l.left].label}  ->  ${state.matchState.right[l.right].label}`).join("; ") : "") : (answer === null ? "" : q.options[answer]),
     questionText: q.text,
-    answerKey: q.type === "match" ? q.pairs.map(p=>p.join(" â†’ ")).join("; ") : q.answerText,
+    answerKey: q.type === "match" ? q.pairs.map(p=>p.join("  ->  ")).join("; ") : q.answerText,
   });
   state.theta = estimateTheta(state.responses);
   sendProgress("in_progress");
 
-  showToast(timedOut ? "â° Waktu habis. Beralih ke soal berikutnya." : "âœ“ Jawaban tersimpan");
+  showToast(timedOut ? " Waktu habis. Beralih ke soal berikutnya." : " Jawaban tersimpan");
 
   setTimeout(() => {
     state.questionIndex += 1;
@@ -537,7 +560,7 @@ function completeLevel(){
  clearTimer();
  if(state.level>=3)return finishAssessment();
  const next=state.level+1;
- app.innerHTML=`<section class="card level-transition"><div class="level-orb">ðŸŽ¯</div><span class="badge">Level ${state.level} selesai</span><h2>Siap memasuki Level ${next}?</h2><p class="lead">Di level ini kamu akan mengerjakan <strong>${CONFIG.QUESTIONS_PER_LEVEL[next]} soal</strong>. Setiap soal memiliki waktu 40 detik.</p><button id="continueLevel" class="btn btn-primary" type="button">Lanjutkan ke Level ${next} â†’</button></section>`;
+ app.innerHTML=`<section class="card level-transition"><div class="level-orb"></div><span class="badge">Level ${state.level} selesai</span><h2>Siap memasuki Level ${next}?</h2><p class="lead">Di level ini kamu akan mengerjakan <strong>${CONFIG.QUESTIONS_PER_LEVEL[next]} soal</strong>. Setiap soal memiliki waktu 40 detik.</p><button id="continueLevel" class="btn btn-primary" type="button">Lanjutkan ke Level ${next}  -> </button></section>`;
  document.getElementById('continueLevel').addEventListener('click',()=>{
   state.level=next;state.questionIndex=0;
   state.currentQuestions=selectQuestions(next);
@@ -561,19 +584,19 @@ function renderResult(score) {
   const duration = Math.round((state.finishedAt - state.startedAt)/1000);
   app.innerHTML = `<section class="result-grid">
     <div class="card score-card">
-      <span class="badge">Asesmen selesai ðŸŽ‰</span>
+      <span class="badge">Asesmen selesai </span>
       <div class="score-ring" style="--score:${score}"><div class="score-value">${score}</div></div>
       <h2 style="margin:0">${escapeHtml(state.student.name)}</h2>
       <p style="color:var(--muted);margin:5px 0 0">${escapeHtml(state.student.className)}</p>
       <div class="stat-list">
         <div class="stat"><span>Benar</span><strong>${totalCorrect}/30</strong></div>
         <div class="stat"><span>Waktu</span><strong>${formatTime(duration)}</strong></div>
-        <div class="stat"><span>IRT Î¸</span><strong>${state.theta.toFixed(2)}</strong></div>
-        <div class="stat"><span>Skala</span><strong>0â€“100</strong></div>
+        <div class="stat"><span>IRT theta</span><strong>${state.theta.toFixed(2)}</strong></div>
+        <div class="stat"><span>Skala</span><strong>0-100</strong></div>
       </div>
     </div>
     <div class="card panel">
-      <h2 style="margin-top:0">${score>=80?"Selamat! Hasilmu sangat baik ðŸŽ‰":score>=60?"Terus tingkatkan kemampuanmu! ðŸŒŸ":"Yuk, pelajari lagi materinya ðŸ“š"}</h2>
+      <h2 style="margin-top:0">${score>=80?"Selamat! Hasilmu sangat baik ":score>=60?"Terus tingkatkan kemampuanmu! ":"Yuk, pelajari lagi materinya "}</h2>
       <p class="lead" style="font-size:1rem">Skor dihitung menggunakan pendekatan IRT/Rasch 1PL sederhana. Setiap butir memiliki parameter kesulitan, lalu kemampuan peserta diestimasi dari pola benar-salah pada seluruh soal yang dikerjakan.</p>
       ${[1,2,3].map(l => {
         const rs = state.responses.filter(r => r.level === l);
@@ -634,7 +657,7 @@ function renderTeacherLogin() {
   clearTimer();
   teacherEntryBtn.classList.add("hidden");
   app.innerHTML = `<section class="card panel" style="max-width:560px;margin:0 auto">
-    <span class="badge">ðŸ” Area Guru</span>
+    <span class="badge"> Area Guru</span>
     <h1 style="font-size:2rem;margin-bottom:10px">Dashboard Asesmen</h1>
     <p class="lead" style="font-size:1rem">Masukkan kunci guru yang sama dengan <code>TEACHER_KEY</code> pada Script Properties Google Apps Script.</p>
     <form id="teacherLoginForm">
@@ -667,12 +690,12 @@ function renderTeacherDashboard(rows) {
   app.innerHTML = `<section class="card panel">
     <div class="toolbar">
       <div>
-        <span class="badge">ðŸ“Š Live Dashboard</span>
+        <span class="badge"> Live Dashboard</span>
         <h2 style="margin:10px 0 0">Pemantauan Hasil Siswa</h2>
       </div>
       <div class="toolbar-actions">
-        <button id="refreshDash" class="btn btn-secondary btn-small" type="button">â†» Refresh</button>
-        <button id="exportExcel" class="btn btn-primary btn-small" type="button">â¬‡ Excel + Analisis Butir</button>
+        <button id="refreshDash" class="btn btn-secondary btn-small" type="button"> Refresh</button>
+        <button id="exportExcel" class="btn btn-primary btn-small" type="button"> Excel + Analisis Butir</button>
         <button id="exitTeacher" class="btn btn-ghost btn-small" type="button">Keluar</button>
       </div>
     </div>
@@ -684,7 +707,7 @@ function renderTeacherDashboard(rows) {
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Nama</th><th>Kelas</th><th>Status</th><th>Progress</th><th>Benar</th><th>IRT Î¸</th><th>Skor</th><th>Waktu</th><th>Update</th></tr></thead>
+        <thead><tr><th>Nama</th><th>Kelas</th><th>Status</th><th>Progress</th><th>Benar</th><th>IRT theta</th><th>Skor</th><th>Waktu</th><th>Update</th></tr></thead>
         <tbody>
           ${normalized.length ? normalized.map(r => `<tr>
             <td><strong>${escapeHtml(r.name)}</strong></td>

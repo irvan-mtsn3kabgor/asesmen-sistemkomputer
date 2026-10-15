@@ -248,3 +248,12 @@ th { position:sticky; top:0; background:#f6f7fd; color:#5a5c78; z-index:1; }
 .level-transition .btn{font-size:1.05rem;margin-top:10px}
 @media(max-width:580px){.main-content{width:calc(100% - 16px);margin:12px auto}.focused-question{padding:17px 12px}.focus-meta{gap:6px}.focus-meta .meta-pill{font-size:.75rem;padding:7px 9px}.progress-dots{gap:3px;margin:10px 0 18px}.progress-dot{height:20px;border-radius:4px;font-size:9px}.focused-question .options-grid{gap:9px}.focused-question .option{min-height:116px;padding:11px 9px;align-items:flex-start;flex-direction:column;justify-content:center;gap:8px;font-size:1rem}.focused-question .opt-letter{width:30px;height:30px;border-radius:9px}.focused-question .match-area{gap:32px}.focused-question .match-item{padding:8px 5px;min-height:79px;font-size:.86rem}.focus-title{font-size:1.27rem}.brand span{font-size:.69rem}.save-btn{min-height:58px}}
 @media(prefers-reduced-motion:reduce){.focused-question,.focused-question .match-line{animation:none;transition:none}}
+
+/* Pengaturan suara pada halaman awal */
+.sound-panel{margin-top:18px;padding:16px;border:1px solid #d9dcff;border-radius:18px;background:#f7f8ff}
+.sound-panel-head{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:12px;color:#22265d}
+.sound-panel-head span{font-size:.82rem;color:#5c618a}
+.sound-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:center;margin-bottom:12px}
+.sound-controls input[type=range]{width:100%;min-height:42px;accent-color:#5b5bd6;cursor:pointer}
+.sound-help{font-size:.78rem;line-height:1.45;color:#64698a;margin:9px 0 0}
+@media(max-width:580px){.sound-controls{grid-template-columns:1fr}.sound-panel{padding:13px}}
