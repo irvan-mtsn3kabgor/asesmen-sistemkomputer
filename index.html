@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#5b5bd6" />
+  <title>Asesmen Sistem Komputer | Kelas VII MTs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Asesmen Sistem Komputer">
+        <div class="brand-mark" aria-hidden="true">💻</div>
+        <div>
+          <strong>Sistem Komputer</strong>
+          <span>Asesmen Interaktif Kelas VII MTs</span>
+        </div>
+      </div>
+      <button id="teacherEntryBtn" class="btn btn-ghost btn-small" type="button">👩‍🏫 Guru</button>
+    </header>
+
+    <main id="app" class="main-content" aria-live="polite"></main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
