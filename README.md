@@ -84,3 +84,9 @@ Klik judul **Nama** atau **Skor** untuk mengurutkan tabel. Klik kembali untuk me
 - Kartu fitur halaman awal dihapus.
 - Setelah memasukkan nama dan kelas, muncul petunjuk dalam dialog dan tombol lanjut dinonaktifkan selama 20 detik. Timer soal dan waktu pengerjaan baru dimulai saat siswa menekan tombol lanjut.
 - Sesi yang sudah berjalan tetap memakai mekanisme pemulihan sesudah refresh.
+
+
+## Alur penyelesaian asesmen (pembaruan)
+Setelah siswa menyimpan jawaban soal ke-30, muncul dialog **Anda telah menyelesaikan asesmen** dengan tombol **Lihat Hasil**. Skor tidak terlihat sampai tombol ditekan. Setelah itu, grafis lingkaran skor beranimasi dari 0 menuju nilai akhir, disertai jingle hasil, waktu pengerjaan, rincian level, motivasi, dan tombol kembali ke awal. Refresh pada dialog akan memulihkan dialog tersebut. Penanda selesai dikirim ke backend saat semua jawaban telah selesai, tanpa menunggu tombol Lihat Hasil.
+
+Perbarui `index.html`, `styles.css`, dan `app.js` di GitHub Pages. `Code.gs` tidak berubah.

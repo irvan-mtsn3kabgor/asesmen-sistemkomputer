@@ -288,3 +288,11 @@ th { position:sticky; top:0; background:#f6f7fd; color:#5a5c78; z-index:1; }
 .instruction-list li{padding-left:4px;margin-bottom:10px}
 .instruction-hint{text-align:center;color:var(--muted);font-size:.88rem;margin:12px 0 0}
 @media(max-width:560px){.brand strong{font-size:.8rem}.logo-placeholder{width:42px;height:42px;min-width:42px}.instruction-card{max-height:94dvh}}
+
+/* Dialog penutup sebelum siswa dapat melihat hasil */
+.completion-card { max-width:600px;margin:clamp(24px,7vh,85px) auto;padding:clamp(25px,6vw,48px);text-align:center;animation:appear .35s ease; }
+.completion-card h1 { font-size:clamp(1.55rem,4.5vw,2.25rem);line-height:1.25;color:#112e72;margin:18px 0 10px; }
+.completion-card p { color:var(--muted);font-size:clamp(1rem,2.5vw,1.12rem);line-height:1.65;margin:0 0 26px; }
+.completion-symbol { width:90px;height:90px;display:grid;place-items:center;border-radius:50%;margin:0 auto 18px;background:#dcfce7;color:#15803d;font-size:3.1rem;font-weight:900;animation:completionPop .55s cubic-bezier(.2,1.5,.5,1) both; }
+@keyframes completionPop { from {transform:scale(.35);opacity:0} to {transform:scale(1);opacity:1} }
+@media(prefers-reduced-motion:reduce) {.completion-card,.completion-symbol{animation:none}}

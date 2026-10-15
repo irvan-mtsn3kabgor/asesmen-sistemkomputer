@@ -5,7 +5,7 @@
 */
 
 const CONFIG = {
-  GAS_URL: "https://script.google.com/macros/s/AKfycbylB0wQ_MCpQEeQQIudGYjmqrIjTuR_r5XTu33rouEeCN5GMyeuPPQ39q6-qS4WNqdx/exec",
+  GAS_URL: "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE",
   QUESTION_TIME_SECONDS: 40,
   QUESTIONS_PER_LEVEL: {1:15, 2:10, 3:5},
   TOTAL_QUESTIONS: 30,
@@ -83,6 +83,8 @@ function restoreStudentSession() {
   teacherEntryBtn.classList.add("hidden");
   if (state.phase === "finished") {
     renderResult(thetaToScore(state.theta));
+  } else if (state.phase === "result_ready") {
+    renderCompletionDialog();
   } else if (state.phase === "advancing") {
     advanceAfterAnswer();
   } else if (state.phase === "transition") {
@@ -660,13 +662,55 @@ function completeLevel(){
 async function finishAssessment() {
   clearTimer();
   state.finishedAt = state.finishedAt || Date.now();
-  state.phase = "finished";
+  state.phase = "result_ready";
   state.theta = estimateTheta(state.responses);
   const score = thetaToScore(state.theta);
   persistStudentSession();
-  renderResult(score);
-  playResultSound(score);
+  renderCompletionDialog();
   sendProgress("finished", score);
+}
+
+function renderCompletionDialog() {
+  clearTimer();
+  teacherEntryBtn.classList.add("hidden");
+  app.innerHTML = `<section class="card completion-card" role="dialog" aria-modal="true" aria-labelledby="completionTitle">
+    <div class="completion-symbol" aria-hidden="true">&#10003;</div>
+    <span class="badge">30 soal selesai</span>
+    <h1 id="completionTitle">Anda telah menyelesaikan asesmen</h1>
+    <p>Seluruh jawabanmu sudah tersimpan. Tekan tombol di bawah untuk melihat hasil belajarmu.</p>
+    <button id="viewResultBtn" class="btn btn-primary btn-wide" type="button">Lihat Hasil</button>
+  </section>`;
+  document.getElementById("viewResultBtn").addEventListener("click", () => {
+    if (state.phase !== "result_ready") return;
+    state.phase = "finished";
+    persistStudentSession();
+    const score = thetaToScore(state.theta);
+    renderResult(score);
+    playResultSound(score);
+  });
+}
+
+function animateScore(score) {
+  const ring = document.querySelector(".score-ring");
+  const value = document.querySelector(".score-value");
+  if (!ring || !value) return;
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+    ring.style.setProperty("--score", score);
+    value.textContent = score;
+    return;
+  }
+  const beganAt = performance.now();
+  const duration = 1250;
+  const draw = (now) => {
+    if (!ring.isConnected || !value.isConnected) return;
+    const t = Math.min(1, (now - beganAt) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const current = Math.round(score * eased);
+    ring.style.setProperty("--score", String(current));
+    value.textContent = current;
+    if (t < 1) requestAnimationFrame(draw);
+  };
+  requestAnimationFrame(draw);
 }
 
 function renderResult(score) {
@@ -676,7 +720,7 @@ function renderResult(score) {
   app.innerHTML = `<section class="result-grid">
     <div class="card score-card">
       <span class="badge">Asesmen selesai </span>
-      <div class="score-ring" style="--score:${score}"><div class="score-value">${score}</div></div>
+      <div class="score-ring" style="--score:0" role="img" aria-label="Skor akhir ${score} dari 100"><div class="score-value">0</div></div>
       <h2 style="margin:0">${escapeHtml(state.student.name)}</h2>
       <p style="color:var(--muted);margin:5px 0 0">${escapeHtml(state.student.className)}</p>
       <div class="stat-list">
@@ -696,6 +740,7 @@ function renderResult(score) {
       <button id="restartBtn" class="btn btn-primary btn-wide" type="button" style="margin-top:8px">Kembali ke Halaman Awal</button>
     </div>
   </section>`;
+  animateScore(score);
   document.getElementById("restartBtn").addEventListener("click", () => {
     clearTimer();
     clearStudentSession();
