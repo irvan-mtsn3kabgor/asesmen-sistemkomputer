@@ -5,12 +5,13 @@
 */
 
 const CONFIG = {
- GAS_URL: "https://script.google.com/macros/s/AKfycbylB0wQ_MCpQEeQQIudGYjmqrIjTuR_r5XTu33rouEeCN5GMyeuPPQ39q6-qS4WNqdx/exec",
+  GAS_URL: "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE",
   QUESTION_TIME_SECONDS: 40,
   QUESTIONS_PER_LEVEL: {1:15, 2:10, 3:5},
   TOTAL_QUESTIONS: 30,
   DASHBOARD_POLL_MS: 8000,
   TEACHER_SESSION_MINUTES: 45,
+  INACTIVITY_MINUTES: 3,
 };
 
 const app = document.getElementById("app");
@@ -34,6 +35,7 @@ const state = {
   matchState: null,
   teacherKey: null,
   teacherPoll: null,
+  teacherClassFilter: "ALL",
 };
 
 
@@ -569,13 +571,12 @@ function renderResult(score) {
       <div class="stat-list">
         <div class="stat"><span>Benar</span><strong>${totalCorrect}/30</strong></div>
         <div class="stat"><span>Waktu</span><strong>${formatTime(duration)}</strong></div>
-        <div class="stat"><span>IRT theta</span><strong>${state.theta.toFixed(2)}</strong></div>
         <div class="stat"><span>Skala</span><strong>0-100</strong></div>
       </div>
     </div>
     <div class="card panel">
       <h2 style="margin-top:0">${score>=80?"Selamat! Hasilmu sangat baik ":score>=60?"Terus tingkatkan kemampuanmu! ":"Yuk, pelajari lagi materinya "}</h2>
-      <p class="lead" style="font-size:1rem">Skor dihitung menggunakan pendekatan IRT/Rasch 1PL sederhana. Setiap butir memiliki parameter kesulitan, lalu kemampuan peserta diestimasi dari pola benar-salah pada seluruh soal yang dikerjakan.</p>
+      <p class="lead" style="font-size:1rem">${score>=80?"Hebat! Kamu telah memahami sistem komputer dengan baik. Pertahankan semangat belajarmu!":score>=60?"Usahamu sudah terlihat. Ayo ulangi materi yang belum dikuasai dan terus berlatih!":"Tetap semangat! Pelajari kembali perangkat komputer dan cara kerjanya, lalu coba lagi dengan percaya diri."}</p>
       ${[1,2,3].map(l => {
         const rs = state.responses.filter(r => r.level === l);
         const correct = rs.reduce((s,r)=>s+r.correct,0);
@@ -645,7 +646,7 @@ function renderTeacherLogin() {
   app.innerHTML = `<section class="card panel" style="max-width:560px;margin:0 auto">
     <span class="badge"> Area Guru</span>
     <h1 style="font-size:2rem;margin-bottom:10px">Dashboard Asesmen</h1>
-    <p class="lead" style="font-size:1rem">Masukkan kode akses guru</p>
+    <p class="lead" style="font-size:1rem">Masukkan kunci guru yang sama dengan <code>TEACHER_KEY</code> pada Script Properties Google Apps Script.</p>
     <form id="teacherLoginForm">
       <div class="field"><label for="teacherKey">Kunci Guru</label><input id="teacherKey" class="input" type="password" autocomplete="current-password" required /></div>
       <button class="btn btn-primary btn-wide" style="margin-top:14px">Masuk Dashboard</button>
@@ -662,6 +663,7 @@ function renderTeacherLogin() {
       return;
     }
     state.teacherKey = key;
+    state.teacherClassFilter = "ALL";
     renderTeacherDashboard(result.rows || []);
     startTeacherPolling();
   });
@@ -669,9 +671,11 @@ function renderTeacherLogin() {
 
 function renderTeacherDashboard(rows) {
   state.dashboardRows = rows;
-  const normalized = [...rows].sort((a,b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
-  const finished = normalized.filter(r => r.status === "finished");
-  const live = normalized.filter(r => r.status !== "finished");
+  const selectedClass = state.teacherClassFilter;
+  const classRows = selectedClass === "ALL" ? rows : rows.filter(r => String(r.className) === selectedClass);
+  const normalized = [...classRows].sort((a,b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  const finished = normalized.filter(r => r.status === "finished" || r.status === "auto_finished");
+  const live = normalized.filter(r => r.status === "in_progress");
   const avg = finished.length ? Math.round(finished.reduce((s,r)=>s+Number(r.score||0),0)/finished.length) : 0;
   app.innerHTML = `<section class="card panel">
     <div class="toolbar">
@@ -684,6 +688,14 @@ function renderTeacherDashboard(rows) {
         <button id="exportExcel" class="btn btn-primary btn-small" type="button"> Excel + Analisis Butir</button>
         <button id="exitTeacher" class="btn btn-ghost btn-small" type="button">Keluar</button>
       </div>
+    </div>
+    <div class="teacher-filter" style="margin:14px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <label for="teacherClassFilter" style="font-weight:800">Filter kelas</label>
+      <select id="teacherClassFilter" class="select" style="width:auto;min-width:170px">
+        <option value="ALL" ${selectedClass==="ALL"?"selected":""}>Semua Kelas</option>
+        ${["A","B","C","D","E","F","G"].map(c=>`<option value="VII ${c}" ${selectedClass===`VII ${c}`?"selected":""}>VII ${c}</option>`).join("")}
+      </select>
+      <span style="color:var(--muted);font-size:.88rem">Ringkasan dan ekspor Excel mengikuti filter.</span>
     </div>
     <div class="teacher-grid">
       <div class="metric"><span>Sedang mengerjakan</span><strong>${live.length}</strong></div>
@@ -698,7 +710,7 @@ function renderTeacherDashboard(rows) {
           ${normalized.length ? normalized.map(r => `<tr>
             <td><strong>${escapeHtml(r.name)}</strong></td>
             <td>${escapeHtml(r.className)}</td>
-            <td><span class="status ${r.status === "finished" ? "done" : "live"}">${r.status === "finished" ? "Selesai" : "Live"}</span></td>
+            <td><span class="status ${r.status === "finished" || r.status === "auto_finished" ? "done" : "live"}">${r.status === "auto_finished" ? "Selesai otomatis" : r.status === "finished" ? "Selesai" : "Live"}</span></td>
             <td>${Number(r.answered||0)}/30</td>
             <td>${Number(r.correct||0)}</td>
             <td>${Number(r.theta||0).toFixed(2)}</td>
@@ -711,9 +723,10 @@ function renderTeacherDashboard(rows) {
     </div>
     <p style="color:var(--muted);font-size:.8rem;margin:10px 0 0">Dashboard memperbarui data otomatis setiap ${Math.round(CONFIG.DASHBOARD_POLL_MS/1000)} detik.</p>
   </section>`;
+  document.getElementById("teacherClassFilter").addEventListener("change", e => { state.teacherClassFilter=e.target.value; renderTeacherDashboard(state.dashboardRows); });
   document.getElementById("refreshDash").addEventListener("click", refreshTeacherDashboard);
   document.getElementById("exportExcel").addEventListener("click", () => exportExcel(normalized));
-  document.getElementById("exitTeacher").addEventListener("click", () => { state.teacherKey = null; stopTeacherPolling(); renderHome(); });
+  document.getElementById("exitTeacher").addEventListener("click", () => { state.teacherClassFilter = "ALL"; state.teacherKey = null; stopTeacherPolling(); renderHome(); });
 }
 
 function startTeacherPolling() {
@@ -727,7 +740,7 @@ function stopTeacherPolling() {
 async function refreshTeacherDashboard() {
   if (!state.teacherKey) return;
   const result = await apiPost({ action:"getResults", teacherKey:state.teacherKey });
-  if (result.ok) renderTeacherDashboard(result.rows || []);
+  if (result.ok && state.teacherKey) renderTeacherDashboard(result.rows || []);
 }
 function formatDate(value) {
   if (!value) return "-";

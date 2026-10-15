@@ -55,3 +55,11 @@ Di halaman awal, siswa dapat memilih suara **Lembut**, **Ceria**, **Singkat**, a
 - Tombol Simpan dan Lanjut memutar suara ceria tiga nada.
 - Saat hasil akhir muncul, jingle diputar otomatis (browser harus mengizinkan audio).
 - Tombol Kembali ke Halaman Awal tersedia pada halaman hasil dan mereset sesi lokal untuk peserta berikutnya.
+
+
+## Pembaruan filter dan penyelesaian otomatis
+- Dashboard guru menyediakan filter Semua Kelas dan VII A sampai VII G. Data ringkasan dan Excel mengikuti pilihan filter.
+- Saat membuka atau memperbarui dashboard, backend menutup sesi `in_progress` yang tidak mengirim pembaruan selama 3 menit atau berjalan melebihi 45 menit. Permintaan siswa yang datang setelah sesi ditutup tidak akan membuka kembali sesi tersebut.
+- Status `Selesai otomatis` mempertahankan jawaban dan skor sementara terakhir yang tersimpan. Ini bukan hasil asesmen 30 soal yang lengkap, sehingga jangan disamakan dengan siswa yang menyelesaikan semua soal.
+- Batas dapat disesuaikan melalui `INACTIVITY_MINUTES` dan `MAX_SESSION_MINUTES` di Code.gs.
+- Wajib deploy ulang versi baru Code.gs pada Google Apps Script, tidak cukup mengganti berkas GitHub saja.
