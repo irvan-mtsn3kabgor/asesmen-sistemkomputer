@@ -337,7 +337,7 @@ function renderHome() {
               </select>
             </div>
           </div>
-          <button class="btn btn-primary btn-wide" style="margin-top:20px" type="submit">Baca Petunjuk Pengerjaan</button>
+          <button class="btn btn-primary btn-wide" style="margin-top:20px" type="submit">Mulai Assesmen</button>
         </form>
       </div>
     </section>`;
@@ -804,7 +804,7 @@ function renderTeacherLogin() {
   app.innerHTML = `<section class="card panel" style="max-width:560px;margin:0 auto">
     <span class="badge"> Area Guru</span>
     <h1 style="font-size:2rem;margin-bottom:10px">Dashboard Asesmen</h1>
-    <p class="lead" style="font-size:1rem">Masukkan kunci guru yang sama dengan <code>TEACHER_KEY</code> pada Script Properties Google Apps Script.</p>
+    <p class="lead" style="font-size:1rem">Masukkan kunci akses</p>
     <form id="teacherLoginForm">
       <div class="field"><label for="teacherKey">Kunci Guru</label><input id="teacherKey" class="input" type="password" autocomplete="current-password" required /></div>
       <button class="btn btn-primary btn-wide" style="margin-top:14px">Masuk Dashboard</button>
