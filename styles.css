@@ -223,3 +223,28 @@ th { position:sticky; top:0; background:#f6f7fd; color:#5a5c78; z-index:1; }
   .match-item { padding:10px; min-height:66px; font-size:.84rem; }
   .teacher-grid { grid-template-columns:1fr 1fr; }
 }
+/* Tampilan fokus asesmen untuk HP, tablet dan desktop */
+.focused-question{max-width:850px;margin:0 auto;padding:clamp(18px,4vw,42px);animation:appear .3s ease}
+@keyframes appear{from{opacity:.2;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.focus-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.progress-dots{display:grid;grid-template-columns:repeat(15,minmax(0,1fr));gap:5px;margin:14px 0 26px}
+.progress-dot{display:grid;place-items:center;height:24px;border-radius:7px;background:#f0f3fc;color:#7783a2;font-size:11px;font-weight:800}
+.progress-dot.done{background:#dcfce7;color:#166534}.progress-dot.active{background:#254ba5;color:white;box-shadow:0 2px 12px #375ac653}
+.focus-title{font-size:clamp(1.3rem,3vw,1.95rem);line-height:1.45;letter-spacing:0;color:#11245a;text-align:center;margin:8px auto 24px;max-width:730px}
+.focused-question .options-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.focused-question .option{display:flex;align-items:center;justify-content:flex-start;text-align:left;gap:12px;min-height:110px;padding:18px;border:2px solid #dce6f6;border-radius:18px;background:#f9fbff;color:#14254d;font-size:clamp(1.02rem,2.2vw,1.2rem);font-weight:800;line-height:1.35;word-break:normal;overflow-wrap:anywhere;transition:.18s ease}
+.focused-question .option:hover{border-color:#7ca3ed;background:#f1f6ff}
+.focused-question .option.selected{background:#e5f0ff;border-color:#2456bb;box-shadow:0 0 0 3px #a6c4ff66;transform:scale(1.01)}
+.focused-question .opt-letter{flex-shrink:0;display:grid;place-items:center;width:39px;height:39px;border-radius:12px;background:#dbe9ff;color:#143e91;font-weight:900}
+.focused-timer{margin:26px 0 17px}.focused-timer .timer-track{height:6px}
+.save-btn{min-height:55px;font-size:1.08rem}.save-btn:disabled{opacity:.43;cursor:not-allowed;box-shadow:none}
+.focused-question .match-item{min-height:70px;font-size:clamp(.91rem,2vw,1.05rem);font-weight:800;line-height:1.3;padding:10px}
+.focused-question .match-area{gap:clamp(38px,9vw,110px)}
+.focused-question .match-line{stroke:#3279ed;stroke-width:4;stroke-linecap:round;stroke-dasharray:500;stroke-dashoffset:500;animation:drawmatch .45s ease forwards}
+@keyframes drawmatch{to{stroke-dashoffset:0}}
+.focused-question .match-instruction{text-align:center;color:#526181;font-size:.95rem}
+.level-transition{max-width:680px;margin:30px auto;padding:48px 25px;text-align:center}
+.level-transition h2{font-size:clamp(1.6rem,4vw,2.4rem);color:#123578}
+.level-transition .btn{font-size:1.05rem;margin-top:10px}
+@media(max-width:580px){.main-content{width:calc(100% - 16px);margin:12px auto}.focused-question{padding:17px 12px}.focus-meta{gap:6px}.focus-meta .meta-pill{font-size:.75rem;padding:7px 9px}.progress-dots{gap:3px;margin:10px 0 18px}.progress-dot{height:20px;border-radius:4px;font-size:9px}.focused-question .options-grid{gap:9px}.focused-question .option{min-height:116px;padding:11px 9px;align-items:flex-start;flex-direction:column;justify-content:center;gap:8px;font-size:1rem}.focused-question .opt-letter{width:30px;height:30px;border-radius:9px}.focused-question .match-area{gap:32px}.focused-question .match-item{padding:8px 5px;min-height:79px;font-size:.86rem}.focus-title{font-size:1.27rem}.brand span{font-size:.69rem}.save-btn{min-height:58px}}
+@media(prefers-reduced-motion:reduce){.focused-question,.focused-question .match-line{animation:none;transition:none}}

@@ -75,7 +75,12 @@ function upsertProgress(data) {
       const idx = ids.indexOf(sessionId);
       if (idx >= 0) targetRow = idx + 2;
     }
-    if (targetRow > 0) sheet.getRange(targetRow,1,1,HEADERS.length).setValues(rowValues);
+    if (targetRow > 0) {
+      const prior = sheet.getRange(targetRow,1,1,HEADERS.length).getValues()[0];
+      if (prior[3] === "finished" && data.status !== "finished") return jsonOutput({ok:true,ignored:true});
+      if (Number(prior[6] || 0) > Number(data.answered || 0)) return jsonOutput({ok:true,ignored:true});
+      sheet.getRange(targetRow,1,1,HEADERS.length).setValues(rowValues);
+    }
     else sheet.appendRow(rowValues[0]);
 
     return jsonOutput({ok:true});
@@ -97,7 +102,7 @@ function getResults(data) {
   const rows = values.slice(1).map(row => {
     const obj = {};
     headers.forEach((h,i) => obj[h] = row[i]);
-    delete obj.responsesJson; // keep dashboard payload small
+    // Jawaban detail diperlukan untuk analisis butir pada dashboard guru.
     return obj;
   });
   return jsonOutput({ok:true,rows:rows});
@@ -105,7 +110,7 @@ function getResults(data) {
 
 function sanitize(value, maxLen) {
   const s = String(value == null ? '' : value).trim();
-  return s.slice(0, maxLen || 500);
+  return /^[=+@\-]/.test(s) ? "\'" + s.slice(0, maxLen || 500) : s.slice(0, maxLen || 500);
 }
 function num(value) {
   const n = Number(value);
