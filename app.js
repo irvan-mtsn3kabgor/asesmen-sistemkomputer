@@ -5,7 +5,7 @@
 */
 
 const CONFIG = {
-  GAS_URL: "https://script.google.com/macros/s/AKfycbylB0wQ_MCpQEeQQIudGYjmqrIjTuR_r5XTu33rouEeCN5GMyeuPPQ39q6-qS4WNqdx/exec",
+  GAS_URL: "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE",
   QUESTION_TIME_SECONDS: 40,
   QUESTIONS_PER_LEVEL: {1:15, 2:10, 3:5},
   TOTAL_QUESTIONS: 30,
@@ -313,22 +313,19 @@ function renderHome() {
   stopTeacherPolling();
   teacherEntryBtn.classList.remove("hidden");
   app.innerHTML = `
-    <section class="hero">
+    <section class="hero hero-simple">
       <div class="card hero-copy">
-        <span class="badge">3 level | 30 soal per sesi</span>
-        <h1>Asesmen Sistem Komputer</h1>
-        <p class="lead">Uji pemahaman tentang perangkat keras, perangkat lunak, input-output, CPU, memori, penyimpanan, dan cara kerja komputer melalui soal interaktif.</p>
-        <div class="feature-pills">
-          <span> 40 detik/soal</span>
-          <span> Soal adaptif</span>
-          <span> Bank soal acak</span>
-          <span> Matching interaktif</span>
+        <span class="badge">Asesmen Informatika Kelas VII MTs</span>
+        <h1>ASESMEN MANDIRI MADRASAH</h1>
+        <div class="subject-summary">
+          <p><strong>Mata Pelajaran :</strong> Informatika</p>
+          <p><strong>Materi :</strong> Sistem Komputer</p>
         </div>
         <form id="startForm">
           <div class="form-grid">
             <div class="field">
               <label for="studentName">Nama Peserta</label>
-              <input class="input" id="studentName" maxlength="60" autocomplete="name" placeholder="Contoh: Aisyah Putri" required />
+              <input class="input" id="studentName" maxlength="60" autocomplete="name" placeholder="Masukkan nama lengkap" required />
             </div>
             <div class="field">
               <label for="studentClass">Kelas</label>
@@ -338,35 +335,66 @@ function renderHome() {
               </select>
             </div>
           </div>
-          <button class="btn btn-primary btn-wide" style="margin-top:16px" type="submit">Mulai Asesmen </button>
+          <button class="btn btn-primary btn-wide" style="margin-top:20px" type="submit">Baca Petunjuk Pengerjaan</button>
         </form>
       </div>
-      <div class="card hero-visual" aria-hidden="true">
-        <svg class="device-illustration" viewBox="0 0 460 360" xmlns="http://www.w3.org/2000/svg">
-          <rect x="74" y="48" width="312" height="202" rx="22" fill="#ffffff"/>
-          <rect x="92" y="67" width="276" height="162" rx="14" fill="#eff0ff"/>
-          <rect x="191" y="251" width="78" height="34" rx="8" fill="#dddfff"/>
-          <rect x="158" y="282" width="145" height="16" rx="8" fill="#ffffff"/>
-          <circle cx="230" cy="149" r="56" fill="#5b5bd6"/>
-          <path d="M204 150h52M230 124v52" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
-          <rect x="25" y="114" width="66" height="88" rx="16" fill="#fff" opacity=".92"/>
-          <circle cx="58" cy="139" r="12" fill="#14b8a6"/>
-          <rect x="42" y="161" width="32" height="8" rx="4" fill="#dfe2f4"/>
-          <rect x="42" y="177" width="24" height="8" rx="4" fill="#dfe2f4"/>
-          <rect x="372" y="118" width="64" height="78" rx="16" fill="#fff" opacity=".92"/>
-          <rect x="389" y="138" width="30" height="30" rx="8" fill="#f59e0b"/>
-          <path d="M397 153h14" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
-        </svg>
-      </div>
     </section>`;
-  document.getElementById("startForm").addEventListener("submit", startAssessment);
+  document.getElementById("startForm").addEventListener("submit", showInstructions);
 }
 
-async function startAssessment(e) {
+let instructionInterval = null;
+function showInstructions(e) {
   e.preventDefault();
   const name = document.getElementById("studentName").value.trim();
   const cls = document.getElementById("studentClass").value;
   if (!name || !cls) return;
+  const existing = document.getElementById("instructionOverlay");
+  if (existing) existing.remove();
+  const overlay = document.createElement("div");
+  overlay.className = "instruction-overlay";
+  overlay.id = "instructionOverlay";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-labelledby", "instructionTitle");
+  overlay.innerHTML = `<div class="instruction-card card">
+    <span class="badge">Sebelum Memulai</span>
+    <h2 id="instructionTitle">Petunjuk Pengerjaan</h2>
+    <p class="instruction-greeting">Baca petunjuk berikut dengan teliti, ${escapeHtml(name)}.</p>
+    <ol class="instruction-list">
+      <li>Asesmen terdiri dari <strong>3 level</strong>, dengan total <strong>30 soal</strong>: Level 1 sebanyak 15 soal, Level 2 sebanyak 10 soal, dan Level 3 sebanyak 5 soal.</li>
+      <li>Setiap soal memiliki waktu maksimal <strong>40 detik</strong>. Jika waktu habis, aplikasi otomatis beralih ke soal berikutnya.</li>
+      <li>Untuk menjawab, ketuk pilihan yang menurutmu benar. Pada soal menjodohkan, ketuk dua pasangan yang sesuai.</li>
+      <li>Tekan <strong>Simpan dan Lanjut</strong> untuk menyimpan jawaban dan melanjutkan ke soal berikutnya.</li>
+      <li>Kerjakan sendiri dengan jujur. Bila halaman tidak sengaja dimuat ulang, asesmen bisa dilanjutkan pada perangkat dan browser yang sama.</li>
+      <li>Setelah selesai, nilai dan total waktu pengerjaan akan ditampilkan.</li>
+    </ol>
+    <button class="btn btn-primary btn-wide" id="instructionsContinue" type="button" disabled>Lanjutkan (20 detik)</button>
+    <p class="instruction-hint" id="instructionHint">Tombol aktif setelah waktu membaca selesai.</p>
+  </div>`;
+  document.body.appendChild(overlay);
+  const next = overlay.querySelector("#instructionsContinue");
+  next.focus();
+  const deadline = Date.now() + 20000;
+  if (instructionInterval) clearInterval(instructionInterval);
+  instructionInterval = setInterval(() => {
+    const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+    if (!overlay.isConnected) { clearInterval(instructionInterval); instructionInterval = null; return; }
+    next.textContent = remaining ? `Lanjutkan (${remaining} detik)` : "Lanjutkan ke Asesmen";
+    if (!remaining) {
+      clearInterval(instructionInterval); instructionInterval = null;
+      next.disabled = false;
+      overlay.querySelector("#instructionHint").textContent = "Petunjuk selesai dibaca. Silakan mulai asesmen.";
+    }
+  }, 200);
+  next.addEventListener("click", () => {
+    if (next.disabled || Date.now() < deadline) return;
+    if (instructionInterval) { clearInterval(instructionInterval); instructionInterval = null; }
+    overlay.remove();
+    beginAssessment(name, cls);
+  }, {once:true});
+}
+
+function beginAssessment(name, cls) {
   clearStudentSession();
   state.student = { name, className: cls };
   state.sessionId = uid();

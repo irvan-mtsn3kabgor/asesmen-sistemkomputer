@@ -76,3 +76,11 @@ Klik judul **Nama** atau **Skor** untuk mengurutkan tabel. Klik kembali untuk me
 - Untuk melanjutkan, gunakan browser, perangkat, dan domain yang sama; mode privat, penghapusan data situs, atau browser yang membatasi localStorage dapat menghapus kemajuan.
 - Cadangan lokal tidak mengubah batas tidak aktif 3 menit dan maksimal sesi 45 menit pada backend. Jika sekolah ingin peserta dapat kembali setelah lebih dari 3 menit, sesuaikan pengaturan backend terlebih dahulu.
 - Jangan gunakan reload sebagai pengganti tombol Simpan dan Lanjut, karena jawaban hanya masuk dalam perhitungan setelah disimpan atau waktu habis.
+
+
+## Revisi halaman depan dan petunjuk
+- Judul: ASESMEN MANDIRI MADRASAH, Mata Pelajaran Informatika, Materi Sistem Komputer.
+- Tempat logo pada header: simpan gambar resmi Kemenag dengan nama `logo-kemenag.png` di folder yang sama dengan `index.html`. Jika belum ada, area logo menampilkan label `LOGO`.
+- Kartu fitur halaman awal dihapus.
+- Setelah memasukkan nama dan kelas, muncul petunjuk dalam dialog dan tombol lanjut dinonaktifkan selama 20 detik. Timer soal dan waktu pengerjaan baru dimulai saat siswa menekan tombol lanjut.
+- Sesi yang sudah berjalan tetap memakai mekanisme pemulihan sesudah refresh.
