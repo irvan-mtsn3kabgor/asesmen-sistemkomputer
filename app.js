@@ -5,7 +5,7 @@
 */
 
 const CONFIG = {
-  GAS_URL: "https://script.google.com/macros/s/AKfycbylB0wQ_MCpQEeQQIudGYjmqrIjTuR_r5XTu33rouEeCN5GMyeuPPQ39q6-qS4WNqdx/exec",
+  GAS_URL: "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE",
   QUESTION_TIME_SECONDS: 40,
   QUESTIONS_PER_LEVEL: {1:15, 2:10, 3:5},
   TOTAL_QUESTIONS: 30,
@@ -36,6 +36,8 @@ const state = {
   teacherKey: null,
   teacherPoll: null,
   teacherClassFilter: "ALL",
+  teacherNameFilter: "",
+  teacherScoreFilter: "ALL",
 };
 
 
@@ -664,6 +666,8 @@ function renderTeacherLogin() {
     }
     state.teacherKey = key;
     state.teacherClassFilter = "ALL";
+    state.teacherNameFilter = "";
+    state.teacherScoreFilter = "ALL";
     renderTeacherDashboard(result.rows || []);
     startTeacherPolling();
   });
@@ -672,7 +676,20 @@ function renderTeacherLogin() {
 function renderTeacherDashboard(rows) {
   state.dashboardRows = rows;
   const selectedClass = state.teacherClassFilter;
-  const classRows = selectedClass === "ALL" ? rows : rows.filter(r => String(r.className) === selectedClass);
+  const nameTerm = state.teacherNameFilter.trim().toLocaleLowerCase('id-ID');
+  const scoreRange = state.teacherScoreFilter;
+  const classRows = rows.filter(r => {
+    if (selectedClass !== "ALL" && String(r.className) !== selectedClass) return false;
+    if (nameTerm && !String(r.name || "").toLocaleLowerCase('id-ID').includes(nameTerm)) return false;
+    const score = Number(r.score);
+    if (scoreRange !== "ALL") {
+      if (!Number.isFinite(score)) return false;
+      if (scoreRange === "0-59" && !(score >= 0 && score < 60)) return false;
+      if (scoreRange === "60-79" && !(score >= 60 && score < 80)) return false;
+      if (scoreRange === "80-100" && !(score >= 80 && score <= 100)) return false;
+    }
+    return true;
+  });
   const normalized = [...classRows].sort((a,b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
   const finished = normalized.filter(r => r.status === "finished" || r.status === "auto_finished");
   const live = normalized.filter(r => r.status === "in_progress");
@@ -695,7 +712,21 @@ function renderTeacherDashboard(rows) {
         <option value="ALL" ${selectedClass==="ALL"?"selected":""}>Semua Kelas</option>
         ${["A","B","C","D","E","F","G"].map(c=>`<option value="VII ${c}" ${selectedClass===`VII ${c}`?"selected":""}>VII ${c}</option>`).join("")}
       </select>
-      <span style="color:var(--muted);font-size:.88rem">Ringkasan dan ekspor Excel mengikuti filter.</span>
+      <div class="teacher-filter-field">
+        <label for="teacherNameFilter">Cari nama siswa</label>
+        <input id="teacherNameFilter" class="input" type="search" autocomplete="off" placeholder="Ketik nama siswa..." value="${escapeHtml(state.teacherNameFilter)}" />
+      </div>
+      <div class="teacher-filter-field">
+        <label for="teacherScoreFilter">Rentang skor</label>
+        <select id="teacherScoreFilter" class="select">
+          <option value="ALL" ${scoreRange === "ALL" ? "selected" : ""}>Semua Skor</option>
+          <option value="0-59" ${scoreRange === "0-59" ? "selected" : ""}>0 - 59 (Perlu belajar lagi)</option>
+          <option value="60-79" ${scoreRange === "60-79" ? "selected" : ""}>60 - 79 (Cukup)</option>
+          <option value="80-100" ${scoreRange === "80-100" ? "selected" : ""}>80 - 100 (Baik)</option>
+        </select>
+      </div>
+      <button id="clearTeacherFilters" class="btn btn-ghost btn-small" type="button">Reset Filter</button>
+      <span class="teacher-filter-info">Menampilkan ${normalized.length} dari ${rows.length} sesi. Ringkasan dan ekspor Excel mengikuti filter.</span>
     </div>
     <div class="teacher-grid">
       <div class="metric"><span>Sedang mengerjakan</span><strong>${live.length}</strong></div>
@@ -724,9 +755,23 @@ function renderTeacherDashboard(rows) {
     <p style="color:var(--muted);font-size:.8rem;margin:10px 0 0">Dashboard memperbarui data otomatis setiap ${Math.round(CONFIG.DASHBOARD_POLL_MS/1000)} detik.</p>
   </section>`;
   document.getElementById("teacherClassFilter").addEventListener("change", e => { state.teacherClassFilter=e.target.value; renderTeacherDashboard(state.dashboardRows); });
+  document.getElementById("teacherNameFilter").addEventListener("input", e => {
+    const target = e.target;
+    const cursor = target.selectionStart;
+    state.teacherNameFilter = target.value;
+    renderTeacherDashboard(state.dashboardRows);
+    const next = document.getElementById("teacherNameFilter");
+    next.focus();
+    try { next.setSelectionRange(cursor, cursor); } catch (_) {}
+  });
+  document.getElementById("teacherScoreFilter").addEventListener("change", e => { state.teacherScoreFilter = e.target.value; renderTeacherDashboard(state.dashboardRows); });
+  document.getElementById("clearTeacherFilters").addEventListener("click", () => {
+    state.teacherClassFilter = "ALL"; state.teacherNameFilter = ""; state.teacherScoreFilter = "ALL";
+    renderTeacherDashboard(state.dashboardRows);
+  });
   document.getElementById("refreshDash").addEventListener("click", refreshTeacherDashboard);
   document.getElementById("exportExcel").addEventListener("click", () => exportExcel(normalized));
-  document.getElementById("exitTeacher").addEventListener("click", () => { state.teacherClassFilter = "ALL"; state.teacherKey = null; stopTeacherPolling(); renderHome(); });
+  document.getElementById("exitTeacher").addEventListener("click", () => { state.teacherClassFilter = "ALL"; state.teacherNameFilter = ""; state.teacherScoreFilter = "ALL"; state.teacherKey = null; stopTeacherPolling(); renderHome(); });
 }
 
 function startTeacherPolling() {
@@ -740,7 +785,16 @@ function stopTeacherPolling() {
 async function refreshTeacherDashboard() {
   if (!state.teacherKey) return;
   const result = await apiPost({ action:"getResults", teacherKey:state.teacherKey });
-  if (result.ok && state.teacherKey) renderTeacherDashboard(result.rows || []);
+  if (result.ok && state.teacherKey) {
+    const nameInputFocused = document.activeElement?.id === "teacherNameFilter";
+    const cursor = nameInputFocused ? document.activeElement.selectionStart : null;
+    renderTeacherDashboard(result.rows || []);
+    if (nameInputFocused) {
+      const input = document.getElementById("teacherNameFilter");
+      input?.focus();
+      try { if (cursor != null) input?.setSelectionRange(cursor, cursor); } catch (_) {}
+    }
+  }
 }
 function formatDate(value) {
   if (!value) return "-";

@@ -257,3 +257,10 @@ th { position:sticky; top:0; background:#f6f7fd; color:#5a5c78; z-index:1; }
 .sound-controls input[type=range]{width:100%;min-height:42px;accent-color:#5b5bd6;cursor:pointer}
 .sound-help{font-size:.78rem;line-height:1.45;color:#64698a;margin:9px 0 0}
 @media(max-width:580px){.sound-controls{grid-template-columns:1fr}.sound-panel{padding:13px}}
+
+/* Filter dashboard guru: ramah layar kecil */
+.teacher-filter-field { display:flex; flex-direction:column; gap:5px; min-width:180px; flex:1 1 185px; }
+.teacher-filter-field label { font-weight:800; font-size:.91rem; }
+.teacher-filter-field .input,.teacher-filter-field .select { width:100%; max-width:100%; }
+.teacher-filter-info { width:100%; color:var(--muted);font-size:.88rem; }
+@media(max-width:600px) { .teacher-filter-field { min-width:100%; } .teacher-filter .select { max-width:100%; } }

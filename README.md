@@ -11,7 +11,7 @@ SPA HTML5/CSS/JS untuk GitHub Pages, backend Google Apps Script dan Google Sheet
 - 40 detik per soal, otomatis timeout dan pindah ke soal selanjutnya. Jawaban baru tersimpan saat tombol **Simpan dan Lanjut** ditekan.
 - Setelah menyelesaikan level, dialog perpindahan berisi jumlah soal berikutnya. Hasil 0–100, benar/30, waktu mm:ss, rekomendasi belajar.
 - Rasch/IRT 1PL **ilustratif** dengan b ditetapkan perancang, bukan parameter terkalibrasi. Nilai akhir transformasi theta, bukan persentase benar.
-- Dashboard guru: skor, waktu, progres dengan polling tiap 8 detik, Excel 3 sheet (`Rekap Peserta`, `Detail Jawaban`, `Analisis Butir`). Proporsi benar dan daya pembeda 27% hanyalah statistik deskriptif, terutama kurang stabil pada sedikit respons.
+- Dashboard guru: filter kelas (A-G), pencarian nama (tanpa membedakan huruf besar-kecil), dan rentang skor (0–59, 60–79, 80–100); filter juga diterapkan pada metrik, ekspor Excel, dan analisis butir. Skor selama sesi masih merupakan skor sementara. Dashboard juga menampilkan skor, waktu, progres dengan polling tiap 8 detik, Excel 3 sheet (`Rekap Peserta`, `Detail Jawaban`, `Analisis Butir`). Proporsi benar dan daya pembeda 27% hanyalah statistik deskriptif, terutama kurang stabil pada sedikit respons.
 
 ## Setup GitHub Pages
 1. Buat repository baru lalu upload **index.html**, **styles.css**, **app.js** ke root repository.
