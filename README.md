@@ -63,3 +63,7 @@ Di halaman awal, siswa dapat memilih suara **Lembut**, **Ceria**, **Singkat**, a
 - Status `Selesai otomatis` mempertahankan jawaban dan skor sementara terakhir yang tersimpan. Ini bukan hasil asesmen 30 soal yang lengkap, sehingga jangan disamakan dengan siswa yang menyelesaikan semua soal.
 - Batas dapat disesuaikan melalui `INACTIVITY_MINUTES` dan `MAX_SESSION_MINUTES` di Code.gs.
 - Wajib deploy ulang versi baru Code.gs pada Google Apps Script, tidak cukup mengganti berkas GitHub saja.
+
+
+### Sort tabel guru
+Klik judul **Nama** atau **Skor** untuk mengurutkan tabel. Klik kembali untuk membalik arah. Nama default A-Z dan skor default tertinggi ke terendah. Tanda panah menunjukkan arah. Sort digunakan setelah filter kelas, nama, dan rentang skor, serta urutan baris rekap Excel mengikuti tampilan.

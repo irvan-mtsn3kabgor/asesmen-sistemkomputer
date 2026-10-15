@@ -5,7 +5,7 @@
 */
 
 const CONFIG = {
-  GAS_URL: "https://script.google.com/macros/s/AKfycbylB0wQ_MCpQEeQQIudGYjmqrIjTuR_r5XTu33rouEeCN5GMyeuPPQ39q6-qS4WNqdx/exec",
+  GAS_URL: "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE",
   QUESTION_TIME_SECONDS: 40,
   QUESTIONS_PER_LEVEL: {1:15, 2:10, 3:5},
   TOTAL_QUESTIONS: 30,
@@ -38,6 +38,8 @@ const state = {
   teacherClassFilter: "ALL",
   teacherNameFilter: "",
   teacherScoreFilter: "ALL",
+  teacherSortColumn: "updatedAt",
+  teacherSortDirection: "desc",
 };
 
 
@@ -690,7 +692,20 @@ function renderTeacherDashboard(rows) {
     }
     return true;
   });
-  const normalized = [...classRows].sort((a,b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  const normalized = [...classRows].sort((a,b) => {
+    const direction = state.teacherSortDirection === "asc" ? 1 : -1;
+    if (state.teacherSortColumn === "name") {
+      const diff = String(a.name || "").localeCompare(String(b.name || ""), "id-ID", { sensitivity: "base", numeric: true });
+      return diff * direction || String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""));
+    }
+    if (state.teacherSortColumn === "score") {
+      const diff = Number(a.score || 0) - Number(b.score || 0);
+      return diff * direction || String(a.name || "").localeCompare(String(b.name || ""), "id-ID", { sensitivity: "base" });
+    }
+    return String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""));
+  });
+  const sortIcon = key => state.teacherSortColumn === key ? (state.teacherSortDirection === "asc" ? "▲" : "▼") : "↕";
+  const sortAria = key => state.teacherSortColumn === key ? (state.teacherSortDirection === "asc" ? "ascending" : "descending") : "none";
   const finished = normalized.filter(r => r.status === "finished" || r.status === "auto_finished");
   const live = normalized.filter(r => r.status === "in_progress");
   const avg = finished.length ? Math.round(finished.reduce((s,r)=>s+Number(r.score||0),0)/finished.length) : 0;
@@ -736,7 +751,7 @@ function renderTeacherDashboard(rows) {
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Nama</th><th>Kelas</th><th>Status</th><th>Progress</th><th>Benar</th><th>IRT theta</th><th>Skor</th><th>Waktu</th><th>Update</th></tr></thead>
+        <thead><tr><th aria-sort="${sortAria("name")}"><button class="table-sort" type="button" data-sort="name" aria-label="Urutkan nama siswa">Nama <span aria-hidden="true">${sortIcon("name")}</span></button></th><th>Kelas</th><th>Status</th><th>Progress</th><th>Benar</th><th>IRT theta</th><th aria-sort="${sortAria("score")}"><button class="table-sort" type="button" data-sort="score" aria-label="Urutkan skor siswa">Skor <span aria-hidden="true">${sortIcon("score")}</span></button></th><th>Waktu</th><th>Update</th></tr></thead>
         <tbody>
           ${normalized.length ? normalized.map(r => `<tr>
             <td><strong>${escapeHtml(r.name)}</strong></td>
@@ -754,6 +769,16 @@ function renderTeacherDashboard(rows) {
     </div>
     <p style="color:var(--muted);font-size:.8rem;margin:10px 0 0">Dashboard memperbarui data otomatis setiap ${Math.round(CONFIG.DASHBOARD_POLL_MS/1000)} detik.</p>
   </section>`;
+  document.querySelectorAll("[data-sort]").forEach(button => button.addEventListener("click", () => {
+    const column = button.dataset.sort;
+    if (state.teacherSortColumn === column) {
+      state.teacherSortDirection = state.teacherSortDirection === "asc" ? "desc" : "asc";
+    } else {
+      state.teacherSortColumn = column;
+      state.teacherSortDirection = column === "name" ? "asc" : "desc";
+    }
+    renderTeacherDashboard(state.dashboardRows);
+  }));
   document.getElementById("teacherClassFilter").addEventListener("change", e => { state.teacherClassFilter=e.target.value; renderTeacherDashboard(state.dashboardRows); });
   document.getElementById("teacherNameFilter").addEventListener("input", e => {
     const target = e.target;
