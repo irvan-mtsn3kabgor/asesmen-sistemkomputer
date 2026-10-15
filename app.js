@@ -5,7 +5,7 @@
 */
 
 const CONFIG = {
-  GAS_URL: "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE",
+  GAS_URL: "https://script.google.com/macros/s/AKfycbylB0wQ_MCpQEeQQIudGYjmqrIjTuR_r5XTu33rouEeCN5GMyeuPPQ39q6-qS4WNqdx/exec",
   QUESTION_TIME_SECONDS: 40,
   QUESTIONS_PER_LEVEL: 5,
   DASHBOARD_POLL_MS: 8000,
