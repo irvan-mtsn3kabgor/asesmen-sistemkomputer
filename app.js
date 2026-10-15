@@ -283,15 +283,6 @@ function renderHome() {
               </select>
             </div>
           </div>
-          <div class="sound-panel" aria-label="Pengaturan efek suara">
-            <div class="sound-panel-head"><strong> Suara tombol Simpan dan Lanjut</strong><span>Atur dan coba sebelum mulai</span></div>
-            <div class="sound-controls">
-              <div class="field"><label for="soundStyle">Karakter suara</label><select id="soundStyle" class="select"><option value="soft">Lembut (dua nada)</option><option value="cheerful">Ceria (tiga nada)</option><option value="click">Singkat (klik)</option><option value="off">Tanpa suara</option></select></div>
-              <div class="field"><label for="soundVolume">Volume: <output id="soundVolumeText">45%</output></label><input id="soundVolume" type="range" min="0" max="100" step="5" value="45" aria-label="Volume efek suara" /></div>
-            </div>
-            <button id="previewSound" type="button" class="btn btn-secondary btn-wide"> Coba Efek Suara</button>
-            <p class="sound-help">Pilihan suara disimpan pada perangkat ini. Suara hanya diputar saat jawaban disimpan, bukan saat waktu habis.</p>
-          </div>
           <button class="btn btn-primary btn-wide" style="margin-top:16px" type="submit">Mulai Asesmen </button>
         </form>
       </div>
@@ -314,15 +305,6 @@ function renderHome() {
       </div>
     </section>`;
   document.getElementById("startForm").addEventListener("submit", startAssessment);
-  const soundStyle = document.getElementById('soundStyle');
-  const soundVolume = document.getElementById('soundVolume');
-  const volumeText = document.getElementById('soundVolumeText');
-  soundStyle.value = soundPreferences.style;
-  soundVolume.value = String(soundPreferences.volume);
-  volumeText.textContent = soundPreferences.volume + '%';
-  soundStyle.addEventListener('change', () => { soundPreferences.style = soundStyle.value; persistSoundPreferences(); });
-  soundVolume.addEventListener('input', () => { soundPreferences.volume = Number(soundVolume.value); volumeText.textContent = soundPreferences.volume + '%'; persistSoundPreferences(); });
-  document.getElementById('previewSound').addEventListener('click', () => { playSaveSound(); if (soundPreferences.style === 'off' || !soundPreferences.volume) showToast('Suara sedang dinonaktifkan'); });
 }
 
 async function startAssessment(e) {
@@ -462,49 +444,44 @@ function clearTimer() {
   state.timerId = null;
 }
 
-// Pengaturan suara berada di browser siswa, bukan disimpan dalam hasil asesmen.
-const SOUND_STORAGE_KEY = 'sistem-komputer-save-sound-v1';
-const soundPreferences = (() => {
-  try {
-    const stored = JSON.parse(localStorage.getItem(SOUND_STORAGE_KEY) || '{}');
-    return {style: ['soft','cheerful','click','off'].includes(stored.style) ? stored.style : 'soft',
-      volume: Number.isFinite(stored.volume) ? Math.max(0,Math.min(100,stored.volume)) : 45};
-  } catch (_) { return {style:'soft', volume:45}; }
-})();
-function persistSoundPreferences(){
-  try { localStorage.setItem(SOUND_STORAGE_KEY, JSON.stringify(soundPreferences)); } catch (_) {}
-}
-let saveSoundContext = null;
-function playSaveSound() {
-  if (soundPreferences.style === 'off' || soundPreferences.volume <= 0) return;
+// Suara ceria bawaan tanpa pengaturan pada halaman awal.
+// Menggunakan Web Audio API, sehingga tidak memerlukan berkas audio tambahan.
+let soundContext = null;
+function playNotes(frequencies, delay, duration, gainAmount) {
   try {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return;
-    if (!saveSoundContext) saveSoundContext = new AudioContextClass();
-    const ctx = saveSoundContext;
+    if (!soundContext) soundContext = new AudioContextClass();
+    const ctx = soundContext;
     if (ctx.state === 'suspended') ctx.resume().catch(() => {});
-    const styles = {
-      soft: {frequencies:[660,880], delay:.09, duration:.17, wave:'sine', gain:.14},
-      cheerful: {frequencies:[523.25,659.25,783.99], delay:.095, duration:.15, wave:'triangle', gain:.12},
-      click: {frequencies:[740], delay:0, duration:.075, wave:'sine', gain:.10}
-    };
-    const profile = styles[soundPreferences.style] || styles.soft;
-    const now = ctx.currentTime + .005;
-    profile.frequencies.forEach((frequency, index) => {
-      const oscillator = ctx.createOscillator();
+    const start = ctx.currentTime + .008;
+    frequencies.forEach((frequency, index) => {
+      const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      const at = now + index * profile.delay;
-      oscillator.type = profile.wave;
-      oscillator.frequency.setValueAtTime(frequency, at);
+      const at = start + index * delay;
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(frequency, at);
       gain.gain.setValueAtTime(.0001, at);
-      gain.gain.exponentialRampToValueAtTime(Math.max(.0002,profile.gain * soundPreferences.volume / 100), at + .012);
-      gain.gain.exponentialRampToValueAtTime(.0001, at + profile.duration);
-      oscillator.connect(gain);
+      gain.gain.exponentialRampToValueAtTime(gainAmount, at + .015);
+      gain.gain.exponentialRampToValueAtTime(.0001, at + duration);
+      osc.connect(gain);
       gain.connect(ctx.destination);
-      oscillator.start(at);
-      oscillator.stop(at + profile.duration + .01);
+      osc.start(at);
+      osc.stop(at + duration + .02);
     });
-  } catch (_) { /* Efek suara opsional; asesmen tetap berjalan. */ }
+  } catch (_) { /* Jika audio tidak didukung, asesmen tetap berjalan. */ }
+}
+function playSaveSound() {
+  // Nada ceria singkat untuk jawaban tersimpan.
+  playNotes([523.25, 659.25, 783.99], .095, .15, .055);
+}
+function playResultSound(score) {
+  // Jingle akhir berbeda untuk hasil tinggi dan hasil yang perlu ditingkatkan.
+  if (score >= 60) {
+    playNotes([523.25, 659.25, 783.99, 1046.5], .16, .29, .065);
+  } else {
+    playNotes([523.25, 659.25, 783.99], .19, .27, .05);
+  }
 }
 
 async function submitAnswer(answer, q, timedOut = false) {
@@ -575,6 +552,7 @@ async function finishAssessment() {
   state.theta = estimateTheta(state.responses);
   const score = thetaToScore(state.theta);
   renderResult(score);
+  playResultSound(score);
   sendProgress("finished", score);
 }
 
@@ -606,7 +584,15 @@ function renderResult(score) {
       <button id="restartBtn" class="btn btn-primary btn-wide" type="button" style="margin-top:8px">Kembali ke Halaman Awal</button>
     </div>
   </section>`;
-  document.getElementById("restartBtn").addEventListener("click", renderHome);
+  document.getElementById("restartBtn").addEventListener("click", () => {
+    clearTimer();
+    state.answerLocked = false;
+    state.student = null;
+    state.sessionId = null;
+    state.responses = [];
+    state.selectedByLevel = {};
+    renderHome();
+  });
 }
 
 async function apiPost(payload) {

@@ -48,3 +48,10 @@ Di halaman awal, siswa dapat memilih suara **Lembut**, **Ceria**, **Singkat**, a
 - HTML memakai UTF-8 dan aset CSS/JS memakai parameter versi agar browser mengambil pembaruan.
 - Efek suara dan semua fungsi asesmen dipertahankan.
 - Setelah unggah file ke GitHub Pages, lakukan refresh paksa browser jika masih melihat tampilan lama.
+
+
+## Revisi suara ceria dan hasil akhir
+- Panel pengaturan suara di halaman awal dihapus.
+- Tombol Simpan dan Lanjut memutar suara ceria tiga nada.
+- Saat hasil akhir muncul, jingle diputar otomatis (browser harus mengizinkan audio).
+- Tombol Kembali ke Halaman Awal tersedia pada halaman hasil dan mereset sesi lokal untuk peserta berikutnya.
