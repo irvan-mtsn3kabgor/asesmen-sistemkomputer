@@ -67,3 +67,12 @@ Di halaman awal, siswa dapat memilih suara **Lembut**, **Ceria**, **Singkat**, a
 
 ### Sort tabel guru
 Klik judul **Nama** atau **Skor** untuk mengurutkan tabel. Klik kembali untuk membalik arah. Nama default A-Z dan skor default tertinggi ke terendah. Tanda panah menunjukkan arah. Sort digunakan setelah filter kelas, nama, dan rentang skor, serta urutan baris rekap Excel mengikuti tampilan.
+
+
+## Pemulihan sesi saat refresh
+- Sesi siswa aktif disimpan di localStorage browser yang sama. Reload membuka soal yang sama dengan opsi/jawaban sementara dan koneksi matching yang tersimpan.
+- Timer menggunakan batas waktu absolut; refresh tidak menambah 40 detik. Jika waktu soal habis ketika halaman tidak aktif, jawaban dikirim sebagai timeout saat aplikasi aktif kembali.
+- Setelah hasil akhir, tombol **Kembali ke Halaman Awal** menghapus cadangan sesi lokal sehingga siswa berikutnya dapat memulai asesmen baru.
+- Untuk melanjutkan, gunakan browser, perangkat, dan domain yang sama; mode privat, penghapusan data situs, atau browser yang membatasi localStorage dapat menghapus kemajuan.
+- Cadangan lokal tidak mengubah batas tidak aktif 3 menit dan maksimal sesi 45 menit pada backend. Jika sekolah ingin peserta dapat kembali setelah lebih dari 3 menit, sesuaikan pengaturan backend terlebih dahulu.
+- Jangan gunakan reload sebagai pengganti tombol Simpan dan Lanjut, karena jawaban hanya masuk dalam perhitungan setelah disimpan atau waktu habis.

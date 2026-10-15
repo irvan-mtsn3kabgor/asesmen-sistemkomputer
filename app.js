@@ -5,7 +5,7 @@
 */
 
 const CONFIG = {
-  GAS_URL: "https://script.google.com/macros/s/AKfycbylB0wQ_MCpQEeQQIudGYjmqrIjTuR_r5XTu33rouEeCN5GMyeuPPQ39q6-qS4WNqdx/exec",
+  GAS_URL: "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE",
   QUESTION_TIME_SECONDS: 40,
   QUESTIONS_PER_LEVEL: {1:15, 2:10, 3:5},
   TOTAL_QUESTIONS: 30,
@@ -31,6 +31,8 @@ const state = {
   theta: 0,
   timerId: null,
   timeLeft: CONFIG.QUESTION_TIME_SECONDS,
+  questionDeadline: null,
+  phase: "home",
   answerLocked: false,
   matchState: null,
   teacherKey: null,
@@ -43,6 +45,53 @@ const state = {
 };
 
 
+// Cadangan sesi pada perangkat yang sama, termasuk urutan acak dan batas waktu.
+const SESSION_STORAGE_KEY = "mts7_asesmen_active_v1";
+function persistStudentSession() {
+  if (!state.student || !state.sessionId || state.phase === "home") return;
+  try {
+    const snapshot = {
+      version: 1, savedAt: Date.now(), student: state.student, sessionId: state.sessionId,
+      startedAt: state.startedAt, finishedAt: state.finishedAt, level: state.level,
+      questionIndex: state.questionIndex, currentQuestions: state.currentQuestions,
+      selectedByLevel: state.selectedByLevel, responses: state.responses, theta: state.theta,
+      questionDeadline: state.questionDeadline, phase: state.phase,
+      selectedAnswer: state.selectedAnswer, matchState: state.matchState
+    };
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(snapshot));
+  } catch (err) { console.warn("Penyimpanan lokal tidak tersedia", err); }
+}
+function clearStudentSession() {
+  try { localStorage.removeItem(SESSION_STORAGE_KEY); } catch (_) {}
+}
+function restoreStudentSession() {
+  let snapshot;
+  try { snapshot = JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY) || "null"); }
+  catch (_) { clearStudentSession(); return false; }
+  if (!snapshot || snapshot.version !== 1 || !snapshot.student?.name ||
+      !snapshot.sessionId || !Array.isArray(snapshot.currentQuestions) ||
+      !Array.isArray(snapshot.responses) || ![1,2,3].includes(snapshot.level)) return false;
+  Object.assign(state, {
+    student: snapshot.student, sessionId: snapshot.sessionId, startedAt: snapshot.startedAt,
+    finishedAt: snapshot.finishedAt, level: snapshot.level,
+    questionIndex: snapshot.questionIndex, currentQuestions: snapshot.currentQuestions,
+    selectedByLevel: snapshot.selectedByLevel || {}, responses: snapshot.responses,
+    theta: snapshot.theta || 0, questionDeadline: snapshot.questionDeadline,
+    phase: snapshot.phase || "question", selectedAnswer: snapshot.selectedAnswer ?? null,
+    matchState: snapshot.matchState || null, answerLocked: false
+  });
+  teacherEntryBtn.classList.add("hidden");
+  if (state.phase === "finished") {
+    renderResult(thetaToScore(state.theta));
+  } else if (state.phase === "advancing") {
+    advanceAfterAnswer();
+  } else if (state.phase === "transition") {
+    completeLevel();
+  } else {
+    renderAssessment(true);
+  }
+  return true;
+}
 // difficulty b roughly follows Rasch 1PL scale. Higher = harder.
 // Each level contains 15 bank questions. 45 total.
 const QUESTION_BANK = {
@@ -318,6 +367,7 @@ async function startAssessment(e) {
   const name = document.getElementById("studentName").value.trim();
   const cls = document.getElementById("studentClass").value;
   if (!name || !cls) return;
+  clearStudentSession();
   state.student = { name, className: cls };
   state.sessionId = uid();
   state.startedAt = Date.now();
@@ -330,17 +380,26 @@ async function startAssessment(e) {
   state.currentQuestions = selectQuestions(1);
   state.selectedByLevel[1] = state.currentQuestions.map(q => q.id);
   teacherEntryBtn.classList.add("hidden");
-  await sendProgress("in_progress");
-  renderAssessment();
+  state.phase = "question";
+  state.questionDeadline = Date.now() + CONFIG.QUESTION_TIME_SECONDS * 1000;
+  persistStudentSession();
+  sendProgress("in_progress");
+  renderAssessment(true);
 }
 
-function renderAssessment() {
+function renderAssessment(resuming = false) {
   const q=state.currentQuestions[state.questionIndex];
   if(!q)return completeLevel();
   state.answerLocked=false;
-  state.timeLeft=40;
-  state.selectedAnswer=null;
-  state.matchState=q.type==='match'?prepareMatchState(q):null;
+  if (!resuming || !state.questionDeadline) {
+    state.questionDeadline = Date.now() + CONFIG.QUESTION_TIME_SECONDS * 1000;
+    state.selectedAnswer = null;
+    state.matchState = q.type === 'match' ? prepareMatchState(q) : null;
+  }
+  state.phase = "question";
+  state.timeLeft = Math.max(0, (state.questionDeadline - Date.now()) / 1000);
+  if (q.type === 'match' && !state.matchState) state.matchState = prepareMatchState(q);
+  persistStudentSession();
   const count=CONFIG.QUESTIONS_PER_LEVEL[state.level];
   app.innerHTML=`<section class="card focused-question">
     <div class="focus-meta"><span class="meta-pill"> Level ${state.level}</span><span class="meta-pill">Soal ${state.questionIndex+1} dari ${count}</span><span class="meta-pill">${escapeHtml(state.student.name)}  -  ${escapeHtml(state.student.className)}</span></div>
@@ -352,6 +411,13 @@ function renderAssessment() {
   </section>`;
   bindQuestionEvents(q);
   document.getElementById('saveNext').addEventListener('click',()=>submitAnswer(q.type==='match'?[...state.matchState.links]:state.selectedAnswer,q));
+  if (resuming) {
+    if (q.type === 'match') updateMatchUI();
+    else if (state.selectedAnswer !== null && state.selectedAnswer !== undefined) {
+      document.querySelectorAll('.option').forEach(btn => btn.classList.toggle('selected', Number(btn.dataset.answer) === state.selectedAnswer));
+      document.getElementById('saveNext').disabled = false;
+    }
+  }
   startTimer(q);
   requestAnimationFrame(()=>{if(q.type==='match')redrawMatchLines()});
 }
@@ -371,6 +437,7 @@ function bindQuestionEvents(q){
   document.querySelectorAll('.option').forEach(btn=>btn.addEventListener('click',()=>{
    if(state.answerLocked)return;
    state.selectedAnswer=Number(btn.dataset.answer);
+   persistStudentSession();
    document.querySelectorAll('.option').forEach(x=>x.classList.toggle('selected',x===btn));
    document.getElementById('saveNext').disabled=false;
   }));
@@ -383,6 +450,7 @@ function bindQuestionEvents(q){
    state.matchState.activeLeft=idx;
    document.querySelectorAll('.match-left').forEach(b=>b.classList.toggle('active',b===btn));
    updateMatchUI();
+   persistStudentSession();
  }));
  document.querySelectorAll('.match-right').forEach(btn=>btn.addEventListener('click',()=>{
    if(state.answerLocked || state.matchState.activeLeft===null)return;
@@ -392,6 +460,7 @@ function bindQuestionEvents(q){
    state.matchState.activeLeft=null;
    document.querySelectorAll('.match-left').forEach(b=>b.classList.remove('active'));
    updateMatchUI();
+   persistStudentSession();
  }));
  window.addEventListener('resize',redrawMatchLines,{once:true});
 }
@@ -428,10 +497,8 @@ function redrawMatchLines() {
 
 function startTimer(q) {
   clearTimer();
-  const started = Date.now();
-  state.timerId = setInterval(() => {
-    const elapsed = (Date.now() - started) / 1000;
-    state.timeLeft = Math.max(0, CONFIG.QUESTION_TIME_SECONDS - elapsed);
+  const tick = () => {
+    state.timeLeft = Math.max(0, (state.questionDeadline - Date.now()) / 1000);
     const text = document.getElementById("timerText");
     const bar = document.getElementById("timerBar");
     if (text) text.textContent = formatTime(state.timeLeft);
@@ -443,7 +510,9 @@ function startTimer(q) {
       clearTimer();
       submitAnswer(null, q, true);
     }
-  }, 100);
+  };
+  tick();
+  if (!state.answerLocked) state.timerId = setInterval(tick, 100);
 }
 function clearTimer() {
   if (state.timerId) clearInterval(state.timerId);
@@ -528,35 +597,45 @@ async function submitAnswer(answer, q, timedOut = false) {
     answerKey: q.type === "match" ? q.pairs.map(p=>p.join("  ->  ")).join("; ") : q.answerText,
   });
   state.theta = estimateTheta(state.responses);
+  state.phase = "advancing";
+  persistStudentSession();
   sendProgress("in_progress");
 
   showToast(timedOut ? " Waktu habis. Beralih ke soal berikutnya." : " Jawaban tersimpan");
 
-  setTimeout(() => {
-    state.questionIndex += 1;
-    if (state.questionIndex >= CONFIG.QUESTIONS_PER_LEVEL[state.level]) completeLevel();
-    else renderAssessment();
-  }, timedOut ? 450 : 650);
+  setTimeout(advanceAfterAnswer, timedOut ? 450 : 650);
 }
 
+function advanceAfterAnswer() {
+  state.questionIndex += 1;
+  state.questionDeadline = null;
+  if (state.questionIndex >= CONFIG.QUESTIONS_PER_LEVEL[state.level]) completeLevel();
+  else renderAssessment();
+}
 function completeLevel(){
  clearTimer();
  if(state.level>=3)return finishAssessment();
+ state.phase = "transition";
+ state.questionDeadline = null;
+ persistStudentSession();
  const next=state.level+1;
  app.innerHTML=`<section class="card level-transition"><div class="level-orb"></div><span class="badge">Level ${state.level} selesai</span><h2>Siap memasuki Level ${next}?</h2><p class="lead">Di level ini kamu akan mengerjakan <strong>${CONFIG.QUESTIONS_PER_LEVEL[next]} soal</strong>. Setiap soal memiliki waktu 40 detik.</p><button id="continueLevel" class="btn btn-primary" type="button">Lanjutkan ke Level ${next}  -> </button></section>`;
  document.getElementById('continueLevel').addEventListener('click',()=>{
   state.level=next;state.questionIndex=0;
   state.currentQuestions=selectQuestions(next);
   state.selectedByLevel[next]=state.currentQuestions.map(q=>q.id);
+  state.questionDeadline=null;
   renderAssessment();
  });
 }
 
 async function finishAssessment() {
   clearTimer();
-  state.finishedAt = Date.now();
+  state.finishedAt = state.finishedAt || Date.now();
+  state.phase = "finished";
   state.theta = estimateTheta(state.responses);
   const score = thetaToScore(state.theta);
+  persistStudentSession();
   renderResult(score);
   playResultSound(score);
   sendProgress("finished", score);
@@ -591,12 +670,14 @@ function renderResult(score) {
   </section>`;
   document.getElementById("restartBtn").addEventListener("click", () => {
     clearTimer();
+    clearStudentSession();
+    state.phase = "home";
     state.answerLocked = false;
     state.student = null;
     state.sessionId = null;
     state.responses = [];
     state.selectedByLevel = {};
-    renderHome();
+    if (!restoreStudentSession()) renderHome();
   });
 }
 
@@ -857,4 +938,4 @@ function exportExcel(rows){
  XLSX.writeFile(wb,`asesmen-komputer-analisis-${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
-renderHome();
+if (!restoreStudentSession()) renderHome();
